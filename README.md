@@ -1,8 +1,9 @@
 # Sams-Book-Shop
 
-Exemplo:
+Exemplos:
 <p align="center">
-  <img src="exemplo.png" alt="Logo CPA">
+  <img src="exemplo.png" alt="Exemplo 1">
+  <img src="exemplo2.png" alt="Exemplo 2">
 </p>
 
 Projeto CRUD simples utilizando React, Node.JS e MySQL!
