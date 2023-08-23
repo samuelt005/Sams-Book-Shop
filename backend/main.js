@@ -2,11 +2,17 @@ import express from "express";
 import cors from "cors";
 import mysql from "mysql";
 
+// Instânciando a framework Express.js
+// O Express.js é um framework para construir aplicativos web e APIs em Node.js de maneira mais fácil e eficiente,
+// fornecendo uma variedade de recursos e abstrações para lidar com tarefas comuns no desenvolvimento web.
 const app = express();
 
+// Habilita o middleware para fazer o parsing do corpo das requisições como JSON
 app.use(express.json());
+// Habilita o middleware para lidar com políticas de CORS (Cross-Origin Resource Sharing)
 app.use(cors());
 
+// Criando a conexão com o banco de dados MySQL
 const db = mysql.createConnection({
     host: "127.0.0.1",
     user: "root",
@@ -14,27 +20,30 @@ const db = mysql.createConnection({
     database: "sams_book_shop",
 });
 
-// Test connection to backend
+// Iniciando o servidor da aplicação
 app.listen(8800, () => {
-    console.log("Connected to backend!");
+    console.log("Conectado ao back-end!");
 });
 
-// Test connection to database
+// Testando a conexão com o banco de dados
 db.connect((err) => {
     if (err) {
-        console.error("Error trying to connect to database:", err);
+        console.error("Erro ao tentar conectar com o banco de dados: ", err);
     } else {
-        console.log("Connected to database!");
+        console.log("Conectado ao banco de dados!");
     }
 });
 
-// Endpoints
+// Endpoint root
 app.get("/", (req, res) => {
     res.json("Hello, this is backend");
 });
 
+// Endpoint para buscar todos os livros
 app.get("/books", (req, res) => {
     const q = "SELECT * FROM books";
+    
+    // Requisição ao DB para buscar todos os livros
     db.query(q, (err, data) => {
         if (err) {
             return res.json(err);
@@ -43,6 +52,7 @@ app.get("/books", (req, res) => {
     });
 });
 
+// Endpoint para adicionar um novo livro
 app.post("/books", (req, res) => {
     const q =
         "INSERT INTO books (`title`, `desc`, `price`, `cover`) VALUES (?)";
@@ -50,7 +60,7 @@ app.post("/books", (req, res) => {
     // Converte o preço de string para decimal usando parseFloat
     const price = parseFloat(req.body.price);
 
-    // Check if the client sent a cover image link or not
+    // Verifica se o cliente forneceu um link de capa ou não
     if (req.body.cover) {
         const values = [
             req.body.title,
@@ -59,6 +69,7 @@ app.post("/books", (req, res) => {
             req.body.cover,
         ];
 
+        // Requisição ao DB para inserir um novo livro
         db.query(q, [values], (err, data) => {
             if (err) {
                 return res.json(err);
@@ -66,7 +77,7 @@ app.post("/books", (req, res) => {
             return res.json("O livro foi criado com sucesso!");
         });
     } else {
-        // Client didn't provide a cover image link, use the default cover path
+        // Cliente não forneceu um link de capa, usa o caminho padrão da capa
         const defaultCoverPath = "default_cover.webp";
         const values = [
             req.body.title,
@@ -74,7 +85,8 @@ app.post("/books", (req, res) => {
             price,
             defaultCoverPath,
         ];
-
+        
+        // Requisição ao DB para inserir um novo livro onde a capa não foi incluída
         db.query(q, [values], (err, data) => {
             if (err) {
                 return res.json(err);
@@ -86,20 +98,23 @@ app.post("/books", (req, res) => {
     }
 });
 
+// Endpoint para excluir um livro por ID
 app.delete("/books/:id", (req, res) => {
     const bookId = req.params.id;
     const q = "DELETE FROM books WHERE id = ?";
 
+    // Requisição ao DB para excluir um livro
     db.query(q, [bookId], (err, data) => {
         if (err) {
             return res.json(err);
         }
         return res.json(
-            "O livro foi excluido com sucesso!"
+            "O livro foi excluído com sucesso!"
         );
     })
 })
 
+// Endpoint para atualizar um livro por ID
 app.put("/books/:id", (req, res) => {
     const bookId = req.params.id;
     const q = "UPDATE books SET `title` = ?, `desc` = ?, `price` = ?, `cover` = ? WHERE id = ?";
@@ -107,7 +122,7 @@ app.put("/books/:id", (req, res) => {
     // Converte o preço de string para decimal usando parseFloat
     const price = parseFloat(req.body.price);
 
-    // Check if the client sent a cover image link or not
+    // Verifica se o cliente forneceu um link de capa ou não
     if (req.body.cover) {
         const values = [
             req.body.title,
@@ -116,6 +131,7 @@ app.put("/books/:id", (req, res) => {
             req.body.cover,
         ];
 
+        // Requisição ao DB para alterar os dados de determinado livro
         db.query(q, [...values, bookId], (err, data) => {
             if (err) {
                 return res.json(err);
@@ -125,7 +141,7 @@ app.put("/books/:id", (req, res) => {
             );
         });
     } else {
-        // Client didn't provide a cover image link, use the default cover path
+        // Cliente não forneceu um link de capa, usa o caminho padrão da capa
         const defaultCoverPath = "default_cover.webp";
         const values = [
             req.body.title,
@@ -134,12 +150,13 @@ app.put("/books/:id", (req, res) => {
             defaultCoverPath,
         ];
 
+        // Requisição ao DB para alterar os dados de determinado livro onde a capa não foi incluída
         db.query(q, [...values, bookId], (err, data) => {
             if (err) {
                 return res.json(err);
             }
             return res.json(
-                "O livro foi atulizado com sucesso!"
+                "O livro foi atulizado com sucesso, todavia não foi fornecido uma imagem para o mesmo!"
             );
         })
     }
