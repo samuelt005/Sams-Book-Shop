@@ -7,6 +7,7 @@ const Update = () => {
     const location = useLocation();
     const bookId = location.pathname.split("/")[2];
 
+    // Estado para armazenar as informações do livro a ser atualizado
     const [book, setBook] = useState({
         title: "",
         desc: "",
@@ -14,14 +15,16 @@ const Update = () => {
         cover: "",
     });
 
+    // Função para atualizar o estado das informações do livro
     const handleChange = (e) => {
         setBook((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
+    // Função para lidar com o clique no botão de atualização
     const handleClick = async (e) => {
         e.preventDefault();
 
-        // Check for empty fields and add the required-input class
+        // Verifica campos vazios e adiciona a classe required-input
         const emptyFields = Object.keys(book).filter((key) => {
             return (
                 key !== "cover" &&
@@ -29,6 +32,7 @@ const Update = () => {
             );
         });
 
+        // Adiciona a classe de estilo "required-input" aos campos vazios
         emptyFields.forEach((field) => {
             const inputElement = document.querySelector(`[name="${field}"]`);
             if (inputElement) {
@@ -36,12 +40,15 @@ const Update = () => {
             }
         });
 
+        // Se houver campos vazios, não prossegue com a atualização
         if (emptyFields.length > 0) {
             return;
         }
 
         try {
+            // Faz uma requisição PUT para atualizar as informações do livro
             await axios.put("http://localhost:8800/books/" + bookId, book);
+            // Navega de volta para a página de livros após a atualização
             navigate("/");
         } catch (err) {
             console.log(err);
